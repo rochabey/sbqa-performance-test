@@ -1,0 +1,20 @@
+# Ignore k6 result output files
+*.json
+*.csv
+
+# Ignore environment files (customize as needed)
+.env
+.env.*
+
+# Ignore npm dependencies if using npm to manage k6 scripts
+node_modules/
+
+# Ignore package lock file if not needed in the repo
+package-lock.json
+
+# Ignore editor or OS-specific files
+.DS_Store
+
+# Ignore logs and temporary files
+*.log
+*.tmp
