@@ -47,18 +47,6 @@ let betslipBetSelectionId = '';
 
 // Define GraphQL queries and mutations
 const queries = {
-    // SportsbetPreferences: {
-    //     query: `
-    //   {
-    //       sportsbetPreferences {
-    //           getUserPreferencesById(id: "", site: "sportsbet") {
-    //               id
-    //           }
-    //       }
-    //   }
-    // `,
-    //     variables: {},
-    // },
     PreferencesQuery : {
         query: `
         query PreferencesQuery($userPreferenceId: ID, $site: String) {
