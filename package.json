@@ -6,9 +6,9 @@
     "run:perf": "dotenv -e .env -- k6 run scripts/demo.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Rochelle Abeywickrama",
   "license": "ISC",
-  "description": "",
+  "description": "Performance test repository for Sportsbet.io",
   "devDependencies": {
     "eslint": "^9.12.0",
     "prettier": "^3.3.3"
