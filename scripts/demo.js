@@ -24,7 +24,8 @@ export let options = {
     },
 };
 
-const BASE_URL = 'https://staging.sportsbet.io/graphql';
+//Declare baseUrl for the test
+const BASE_URL = __ENV.BASE_URL || 'https://staging.sportsbet.io/graphql';
 
 // Declare global variables for reuse
 let site = 'sportsbet';
