@@ -11,6 +11,7 @@ import {DesktopAsianEventListPreviewQuery} from "../graphqls/DesktopAsianEventLi
 import {AddSelectionToBetslipMutation} from "../graphqls/AddSelectionToBetslipMutation.js";
 import {UpdateSingleBetslipStakeMutation} from "../graphqls/UpdateSingleBetslipStakeMutation.js";
 import {PlaceBetSingleBetsMutation} from "../graphqls/PlaceBetSingleBetsMutation.js";
+import {generateUUIDv4, toGraphqlId} from "../utils/utils.js";
 
 // Define custom metrics to count successful responses
 let successCounter = new Counter("successful_requests");
@@ -54,193 +55,128 @@ let betslipBetId = '';
 let betslipBetSelectionId = '';
 
 
-
 // Define GraphQL queries and mutations
 const requestVariables = {
-    PreferencesQuery : {
+    PreferencesQuery: {
         variables: {
-            site : site,
-            userPreferenceId : SportsbetPreferencesUserPreference
+            site: site,
+            userPreferenceId: SportsbetPreferencesUserPreference
         },
     },
-    LoginUser : {
+    LoginUser: {
         variables: {
-            username : 'rochelle_test',
-            password : 'Qaqaqa@1',
-            authClearanceId : '',
-            site : site,
-            captcha : '',
-            captchaVersion : 'v3',
-            otp : '',
-            brand : site
+            username: 'rochelle_test',
+            password: 'Qaqaqa@1',
+            authClearanceId: '',
+            site: site,
+            captcha: '',
+            captchaVersion: 'v3',
+            otp: '',
+            brand: site
         },
     },
-    TakeOwnershipOfBetSlip : {
+    TakeOwnershipOfBetSlip: {
         variables: {
-            token : authToken,
-            betslipId : SportsbetPreferencesBetslip,
-            userPreferenceId : SportsbetPreferencesUserPreference
+            token: authToken,
+            betslipId: SportsbetPreferencesBetslip,
+            userPreferenceId: SportsbetPreferencesUserPreference
         },
     },
-    BetslipQuery : {
+    BetslipQuery: {
         variables: {
-            language : 'en',
-            site : site,
-            betslipId : SportsbetPreferencesBetslip
+            language: 'en',
+            site: site,
+            betslipId: SportsbetPreferencesBetslip
         },
     },
-    UpcomingRegionCategoriesQuery : {
+    UpcomingRegionCategoriesQuery: {
         variables: {
-            language : 'en',
-            site : site,
-            childType : 'TODAY',
-            regionChildType : 'TODAY',
-            leagueEventCountType : 'TODAY',
-            sportEventCountType : 'TODAY',
-            featuredTournamentsChildType : 'TODAY',
-            leagueTournaments : 'TODAY',
-            tournamentEventCount : 'TODAY',
-            featuredLeagueTournaments : 'TODAY'
+            language: 'en',
+            site: site,
+            childType: 'TODAY',
+            regionChildType: 'TODAY',
+            leagueEventCountType: 'TODAY',
+            sportEventCountType: 'TODAY',
+            featuredTournamentsChildType: 'TODAY',
+            leagueTournaments: 'TODAY',
+            tournamentEventCount: 'TODAY',
+            featuredLeagueTournaments: 'TODAY'
         },
     },
-    DesktopAsianEventListPreviewQuery : {
+    DesktopAsianEventListPreviewQuery: {
         variables: {
-            language : 'en',
-            site : site,
-            tournamentId : tournamentId,
-            childType : 'TODAY',
-            cricketIncluded : false
+            language: 'en',
+            site: site,
+            tournamentId: tournamentId,
+            childType: 'TODAY',
+            cricketIncluded: false
         },
     },
-    AddSelectionToBetslipMutation : {
+    AddSelectionToBetslipMutation: {
         variables: {
-            language : 'en',
-            input : {
-                preferenceId : SportsbetPreferencesUserPreference,
-                site : site,
-                id : SportsbetNewGraphqlBetslip,
-                betId : SportsbetNewGraphqlBetslipBet,
-                selection : {
-                    stake : '0',
-                    id : SportsbetNewGraphqlBetslipBetSelection,
-                    odds : odds,
-                    eventId : eventId,
-                    marketId : marketId,
-                    selectionId : selectionId,
-                    providerProductId : '997'
-                }
-            }
-        },
-    },
-    UpdateSingleBetslipStakeMutation : {
-        variables: {
-            language : 'en',
+            language: 'en',
             input: {
-                stake : '1000',
-                selectionId : selectionId,
-                id : SportsbetNewGraphqlBetslip
+                preferenceId: SportsbetPreferencesUserPreference,
+                site: site,
+                id: SportsbetNewGraphqlBetslip,
+                betId: SportsbetNewGraphqlBetslipBet,
+                selection: {
+                    stake: '0',
+                    id: SportsbetNewGraphqlBetslipBetSelection,
+                    odds: odds,
+                    eventId: eventId,
+                    marketId: marketId,
+                    selectionId: selectionId,
+                    providerProductId: '997'
+                }
             }
         },
     },
-    PlaceBetSingleBetsMutation : {
+    UpdateSingleBetslipStakeMutation: {
         variables: {
-            language : 'en',
-            input : {
-                os : 'MacIntel',
-                device : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                site : site,
-                requestId : '64c178183bb88ed332b5a1379d858488',
-                currencyCode : 'BTC',
-                locale : 'en',
-                betslipId : SportsbetNewGraphqlBetslip,
-                selections : {
-                    id : selectionId,
-                    odds : odds,
-                    betBoostTemplateId : null,
-                    amount : 1000,
-                    freeBetId : null,
-                    providerProductId : '997',
-                    type : 'DEFAULT'
+            language: 'en',
+            input: {
+                stake: '1000',
+                selectionId: selectionId,
+                id: SportsbetNewGraphqlBetslip
+            }
+        },
+    },
+    PlaceBetSingleBetsMutation: {
+        variables: {
+            language: 'en',
+            input: {
+                os: 'MacIntel',
+                device: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                site: site,
+                requestId: '64c178183bb88ed332b5a1379d858488',
+                currencyCode: 'BTC',
+                locale: 'en',
+                betslipId: SportsbetNewGraphqlBetslip,
+                selections: {
+                    id: selectionId,
+                    odds: odds,
+                    betBoostTemplateId: null,
+                    amount: 1000,
+                    freeBetId: null,
+                    providerProductId: '997',
+                    type: 'DEFAULT'
                 }
             }
         },
     },
 }
 
-// Function to generate a UUIDv4
-function generateUUIDv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = (Math.random() * 16) | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-    });
-}
-
-// Custom UTF-8 encoding function
-function utf8Encode(str) {
-    const utf8 = [];
-    for (let i = 0; i < str.length; i++) {
-        let charCode = str.charCodeAt(i);
-        if (charCode < 0x80) utf8.push(charCode);
-        else if (charCode < 0x800) {
-            utf8.push(0xc0 | (charCode >> 6));
-            utf8.push(0x80 | (charCode & 0x3f));
-        } else if (charCode < 0x10000) {
-            utf8.push(0xe0 | (charCode >> 12));
-            utf8.push(0x80 | ((charCode >> 6) & 0x3f));
-            utf8.push(0x80 | (charCode & 0x3f));
-        } else {
-            utf8.push(0xf0 | (charCode >> 18));
-            utf8.push(0x80 | ((charCode >> 12) & 0x3f));
-            utf8.push(0x80 | ((charCode >> 6) & 0x3f));
-            utf8.push(0x80 | (charCode & 0x3f));
-        }
-    }
-    return utf8;
-}
-
-// Custom Base64 encoding function
-function encodeBase64(byteArray) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    let encoded = '';
-    let i = 0;
-
-    while (i < byteArray.length) {
-        const b1 = byteArray[i++];
-        const b2 = byteArray[i++];
-        const b3 = byteArray[i++];
-
-        const e1 = b1 >> 2;
-        const e2 = ((b1 & 3) << 4) | (b2 >> 4);
-        const e3 = ((b2 & 15) << 2) | (b3 >> 6);
-        const e4 = b3 & 63;
-
-        if (isNaN(b2)) {
-            encoded += chars.charAt(e1) + chars.charAt(e2) + '==';
-        } else if (isNaN(b3)) {
-            encoded += chars.charAt(e1) + chars.charAt(e2) + chars.charAt(e3) + '=';
-        } else {
-            encoded += chars.charAt(e1) + chars.charAt(e2) + chars.charAt(e3) + chars.charAt(e4);
-        }
-    }
-
-    return encoded;
-}
-
-// Function to convert a database ID to a GraphQL ID with Base64 encoding
-function toGraphqlId(databaseId, prefix) {
-    const str = `${prefix}:${databaseId}`;
-    const utf8Bytes = utf8Encode(str); // Convert string to UTF-8 byte array
-    return encodeBase64(utf8Bytes);    // Encode to Base64
-}
-
-export default function () {
+export default function() {
 
     // Step 1: Sportsbet Preferences  -----------------------------------------------------------------------
     let sportsbetPreferences = http.post(`${BASE_URL}`, JSON.stringify({
         query: sportsbetPreferencesQuery,
-        variables: {} }),
-        {headers: { 'Content-Type': 'application/json' },
+        variables: {}
+    }), {
+        headers: {
+            'Content-Type': 'application/json'
+        },
     });
     SportsbetPreferencesUserPreference = sportsbetPreferences.json('data.sportsbetPreferences.getUserPreferencesById.id');
     check(sportsbetPreferences, {
@@ -253,9 +189,11 @@ export default function () {
     // Step 2: Preferences Query -----------------------------------------------------------------------
     let preferencesQuery = http.post(`${BASE_URL}`, JSON.stringify({
         query: PreferencesQuery,
-        variables : requestVariables.PreferencesQuery.variables
+        variables: requestVariables.PreferencesQuery.variables
     }), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
     });
     SportsbetPreferencesBetslip = preferencesQuery.json('data.sportsbetPreferences.getUserPreferencesById.betslipId');
     check(preferencesQuery, {
@@ -270,7 +208,9 @@ export default function () {
         query: LoginUserMutation,
         variables: requestVariables.LoginUser.variables
     }), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
     });
     authToken = 'Bearer ' + loginUserQuery.json('data.userManagementLoginViaPassword.token');
     check(loginUserQuery, {
@@ -330,10 +270,10 @@ export default function () {
     requestVariables.DesktopAsianEventListPreviewQuery.variables.tournamentId = tournamentId;
 
     // Step 6: DesktopAsianEventListPreview Query -----------------------------------------------------------------------
-   let desktopAsianEventListPreviewQuery = http.post(`${BASE_URL}`, JSON.stringify({
-       query: DesktopAsianEventListPreviewQuery,
-       variables: requestVariables.DesktopAsianEventListPreviewQuery.variables
-   }), {
+    let desktopAsianEventListPreviewQuery = http.post(`${BASE_URL}`, JSON.stringify({
+        query: DesktopAsianEventListPreviewQuery,
+        variables: requestVariables.DesktopAsianEventListPreviewQuery.variables
+    }), {
         headers: headers,
     });
     eventId = desktopAsianEventListPreviewQuery.json('data.sportsbetNewGraphql.getTournamentById.events.0.id');
@@ -364,10 +304,10 @@ export default function () {
     requestVariables.AddSelectionToBetslipMutation.variables.input.selection.selectionId = selectionId;
 
     // Step 7: AddSelectionToBetslipMutation Query -----------------------------------------------------------------------
-   let addSelectionToBetslipMutation = http.post(`${BASE_URL}`, JSON.stringify({
-       query: AddSelectionToBetslipMutation,
-       variables: requestVariables.AddSelectionToBetslipMutation.variables
-   }), {
+    let addSelectionToBetslipMutation = http.post(`${BASE_URL}`, JSON.stringify({
+        query: AddSelectionToBetslipMutation,
+        variables: requestVariables.AddSelectionToBetslipMutation.variables
+    }), {
         headers: headers,
     });
     betslipId = addSelectionToBetslipMutation.json('data.sportsbetNewGraphqlAddSelectionToBetslip.betslip.id')
@@ -380,10 +320,10 @@ export default function () {
     requestVariables.UpdateSingleBetslipStakeMutation.variables.input.id = SportsbetNewGraphqlBetslip;
 
     // Step 8: UpdateSingleBetslipStakeMutation Query -----------------------------------------------------------------------
-   let updateSingleBetslipStakeMutation = http.post(`${BASE_URL}`, JSON.stringify({
-       query: UpdateSingleBetslipStakeMutation,
-       variables: requestVariables.UpdateSingleBetslipStakeMutation.variables
-   }), {
+    let updateSingleBetslipStakeMutation = http.post(`${BASE_URL}`, JSON.stringify({
+        query: UpdateSingleBetslipStakeMutation,
+        variables: requestVariables.UpdateSingleBetslipStakeMutation.variables
+    }), {
         headers: headers,
     });
     betslipId = updateSingleBetslipStakeMutation.json('data.sportsbetNewGraphqlUpdateSingleBetslipStake.betslip.id')
