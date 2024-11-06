@@ -4,7 +4,8 @@
 
 ### Prerequisites
 <h4>1. Install Node.js</h4>
-Ensure you have Node.js installed, as it may be used for additional dependencies or scripts. Download it here: [Node.js Download](https://nodejs.org/en)
+Ensure you have Node.js installed, as it may be used for additional dependencies or scripts.
+[Node.js Download](https://nodejs.org/en)
 
 <h4>2. Install k6</h4>
 You can install k6 using Homebrew (macOS), Chocolatey (Windows), or download it directly.

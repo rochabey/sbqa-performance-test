@@ -2,6 +2,15 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Counter } from 'k6/metrics';
 import {sportsbetPreferencesQuery} from '../graphqls/SportsbetPreferences.js';
+import {PreferencesQuery} from "../graphqls/PreferencesQuery.js";
+import {LoginUserMutation} from "../graphqls/LoginUser.js";
+import {TakeOwnershipOfBetSlipMutation} from "../graphqls/TakeOwnershipOfBetSlip.js";
+import {BetslipQuery} from "../graphqls/BetslipQuery.js";
+import {UpcomingRegionCategoriesQuery} from "../graphqls/UpcomingRegionCategoriesQuery.js";
+import {DesktopAsianEventListPreviewQuery} from "../graphqls/DesktopAsianEventListPreviewQuery.js";
+import {AddSelectionToBetslipMutation} from "../graphqls/AddSelectionToBetslipMutation.js";
+import {UpdateSingleBetslipStakeMutation} from "../graphqls/UpdateSingleBetslipStakeMutation.js";
+import {PlaceBetSingleBetsMutation} from "../graphqls/PlaceBetSingleBetsMutation.js";
 
 // Define custom metrics to count successful responses
 let successCounter = new Counter("successful_requests");
@@ -26,9 +35,9 @@ export let options = {
 
 //Declare baseUrl for the test
 const BASE_URL = __ENV.BASE_URL || 'https://staging.sportsbet.io/graphql';
+const site = __ENV.SITE || 'sportsbet';
 
 // Declare global variables for reuse
-let site = 'sportsbet';
 let SportsbetPreferencesUserPreference = '';
 let SportsbetPreferencesBetslip = '';
 let SportsbetNewGraphqlBetslip = '';
@@ -47,74 +56,14 @@ let betslipBetSelectionId = '';
 
 
 // Define GraphQL queries and mutations
-const queries = {
+const requestVariables = {
     PreferencesQuery : {
-        query: `
-        query PreferencesQuery($userPreferenceId: ID, $site: String) {
-          sportsbetPreferences {
-              id
-              getUserPreferencesById(id: $userPreferenceId, site: $site) {
-                  id
-                  language
-                  currency
-                  wallets
-                  colorScheme
-                  btcDisplayType
-                  acceptOddsChanges
-                  acceptOddsFluctuations
-                  quickBet
-                  betslipId
-                  forgetBetslip
-                  oddsFormat
-                  receiveMarketingEmail
-                  receiveMarketingSms
-                  refCode
-                  cid
-                  refAff
-                  viewType
-                  videoNotificationsDisabled
-                  __typename
-              }
-              __typename
-          }
-      }
-        `,
         variables: {
             site : site,
             userPreferenceId : SportsbetPreferencesUserPreference
         },
     },
     LoginUser : {
-        query: `
-      mutation LoginUser($username: String!, $password: String!, $captcha: String!, $captchaVersion: String, $otp: String!, $brand: String, $site: String, $authClearanceId: String) {
-          userManagementLoginViaPassword(
-              input: {
-                  site: $site,
-                  username: $username,
-                  password: $password,
-                  captcha: $captcha,
-                  captchaVersion: $captchaVersion,
-                  otp: $otp,
-                  brand: $brand,
-                  authClearanceId: $authClearanceId
-              }
-          ) {
-              sessionId
-              token
-              errors {
-                  code
-                  message
-                  params {
-                      name
-                      value
-                      __typename
-                  }
-                  __typename
-              }
-              __typename
-          }
-      }
-       `,
         variables: {
             username : 'rochelle_test',
             password : 'Qaqaqa@1',
@@ -127,28 +76,6 @@ const queries = {
         },
     },
     TakeOwnershipOfBetSlip : {
-        query: `
-      mutation TakeOwnershipOfBetSlip($betslipId: GraphqlId!, $token: String!, $userPreferenceId: GraphqlId!) {
-          sportsbetNewGraphqlTakeOwnershipOfBetslip(
-              input: {
-                  id: $betslipId,
-                  userJwtToken: $token,
-                  userPreferenceId: $userPreferenceId
-              }
-          ) {
-              errors {
-                  message
-                  code
-                  __typename
-              }
-              betslip {
-                  id
-                  __typename
-              }
-              __typename
-          }
-      }
-        `,
         variables: {
             token : authToken,
             betslipId : SportsbetPreferencesBetslip,
@@ -156,120 +83,6 @@ const queries = {
         },
     },
     BetslipQuery : {
-        query: `
-        query BetslipQuery($betslipId: GraphqlId!, $language: String!) {
-            sportsbetNewGraphql {
-                id
-                getBetslipById(id: $betslipId) {
-                    ...BetslipFragment
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment BetslipFragment on SportsbetNewGraphqlBetslip {
-            __typename
-            id
-            userId
-            active
-            type
-            stake
-            currencyCode
-            insuranceActive
-            isEligibleForMultibetEnsurance
-            __typename
-            bets {
-                __typename
-                id
-                freeBetId
-                selections {
-                    __typename
-                    id
-                    marketId
-                    selectionId
-                    eventId
-                    betBoostTemplateId
-                    stake
-                    odds
-                    EW
-                    __typename
-                    event {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        maxBetAvailable
-                        information {
-                            __typename
-                            id
-                            customEventId
-                            allowCustomEventMultibets
-                        }
-                        providerId
-                        slug
-                        sport {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                            viewType
-                        }
-                        tournament {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        league {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        racingEventInfo {
-                            __typename
-                            id
-                            eventNumber
-                            trackName
-                        }
-                    }
-                    market {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        marketFeatures
-                        selections {
-                            __typename
-                            id
-                            name(language: $language)
-                            active
-                        }
-                        market_type {
-                            __typename
-                            id
-                            settings {
-                                __typename
-                                id
-                                betBoostMultiplier
-                            }
-                        }
-                    }
-                    selection {
-                        __typename
-                        id
-                        odds
-                        name(language: $language)
-                        active
-                        providerProductId
-                    }
-                }
-            }
-        }
-        `,
         variables: {
             language : 'en',
             site : site,
@@ -277,65 +90,6 @@ const queries = {
         },
     },
     UpcomingRegionCategoriesQuery : {
-        query: `
-        query UpcomingRegionCategoriesQuery($language: String!, $childType: SportsbetNewGraphqlSportLeagues!, $regionChildType: SportsbetNewGraphqlRegionSports!, $featuredLeagueTournaments: SportsbetNewGraphqlFeaturedLeagueTournaments!, $leagueTournaments: SportsbetNewGraphqlLeagueTournaments!, $tournamentEventCount: SportsbetNewGraphqlTournamentEventCount!, $sportEventCountType: SportsbetNewGraphqlSportEventCount!, $site: String) {
-            sportsbetNewGraphql {
-                id
-                region {
-                    id
-                    name
-                    sports(childType: $regionChildType, sportType: WITHRACING, site: $site) {
-                        slug
-                        viewType
-                        featuredLeague {
-                            id
-                            name(language: $language)
-                            tournaments(childType: $featuredLeagueTournaments) {
-                                id
-                                slug
-                                name(language: $language)
-                                eventCount(childType: $tournamentEventCount)
-                                league {
-                                    id
-                                    slug
-                                    name(language: $language)
-                                    __typename
-                                }
-                                __typename
-                            }
-                            __typename
-                        }
-                        leagues(childType: $childType, site: $site) {
-                                id
-                                name(language: $language)
-                                slug
-                                tournaments(childType: $leagueTournaments, site: $site) {
-                                    id
-                                    slug
-                                    name(language: $language)
-                                    eventCount(childType: $tournamentEventCount)
-                                    __typename
-                                }
-                                __typename
-                            }
-                            ...SportCategory
-                        __typename
-                    }
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment SportCategory on SportsbetNewGraphqlSport {
-            id
-            name(language: $language)
-            eventCount(childType: $sportEventCountType)
-            iconCode
-            slug
-            __typename
-        }
-    `,
         variables: {
             language : 'en',
             site : site,
@@ -350,214 +104,6 @@ const queries = {
         },
     },
     DesktopAsianEventListPreviewQuery : {
-        query: `
-        query DesktopAsianEventListPreviewQuery($language: String!, $tournamentId: GraphqlId!, $childType: SportsbetNewGraphqlTournamentEvents!, $cricketIncluded: Boolean!) {
-            sportsbetNewGraphql {
-                id
-                getTournamentById(id: $tournamentId) {
-                    id
-                    events(childType: $childType) {
-                        ...DesktopAsianEventFragment
-                        __typename
-                    }
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment DesktopAsianEventFragment on SportsbetNewGraphqlEvent {
-            id
-            __typename
-            asian {
-                id
-                __typename
-                ftMatchWinner {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-                ftTotal {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-                ftHandicap {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-                htTotal {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-                htHandicap {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-                htMatchWinner {
-                    ...EventListMarketQueryFragment
-                    __typename
-                }
-            }
-            ...EventListInformationQueryFragment
-        }
-        
-        fragment EventListMarketQueryFragment on SportsbetNewGraphqlMarket {
-            id
-            __typename
-            enName: name(language: "en")
-            name(language: "en")
-            status
-            specifiers
-            selections {
-                id
-                __typename
-                enName: name(language: "en")
-                name(language: $language)
-                active
-                odds
-                providerProductId
-                competitorType
-            }
-            market_type {
-                id
-                __typename
-                name
-                description
-                translation_key
-                type
-                settings {
-                    id
-                    betBoostMultiplier
-                    __typename
-                }
-            }
-        }
-        
-        fragment EventListInformationQueryFragment on SportsbetNewGraphqlEvent {
-            id
-            __typename
-            type
-            status
-            start_time
-            market_count
-            live_odds
-            slug
-            name(language: $language)
-            enName: name(language: "en")
-            maxBetAvailable
-            videoStream {
-                id
-                __typename
-                streamAvailable
-            }
-            sport {
-                id
-                __typename
-                slug
-                name(language: $language)
-                betBoostMultiplier
-                iconCode
-                viewType
-            }
-            league {
-                id
-                __typename
-                slug
-                name(language: $language)
-                betBoostMultiplier
-            }
-            tournament {
-                id
-                __typename
-                slug
-                name(language: $language)
-                betBoostMultiplier
-            }
-            competitors {
-                id
-                __typename
-                name(language: $language)
-                enName
-                type
-                betradarId
-            }
-            information {
-                id
-                __typename
-                match_time
-                provider_prefix
-                period_scores {
-                    id
-                    __typename
-                    home_score
-                    away_score
-                }
-                match_status_translations(language: $language)
-                home_score
-                away_score
-                home_gamescore
-                away_gamescore
-                provider_product_id
-            }
-            premiumCricketScoringData @include(
-                if: $cricketIncluded) {
-                ...CricketStatsFragment
-                __typename
-            }
-            isSportcastFixtureActive
-            sportcastFixtureId
-            kerosports {
-                isPublished
-                gameId
-                __typename
-            }
-        }
-        
-        fragment CricketStatsFragment on SportsbetNewGraphqlPremiumCricketScore {
-            id
-            matchTitle
-            matchCommentary
-            battingTeam {
-                id
-                teamWickets
-                teamRuns
-                teamOvers
-                teamName
-                sixes
-                fours
-                __typename
-            }
-            previousInnings {
-                id
-                wickets
-                teamName
-                runs
-                oversAvailable
-                overs
-                inningsNumber
-                competitorId
-                __typename
-            }
-            overs {
-                id
-                runs
-                overNumber
-                isCurrentOver
-                balls
-                __typename
-            }
-            batsmen {
-                sixes
-                runs
-                onStrike
-                fours
-                batsmanName
-                balls
-                active
-                __typename
-            }
-            __typename
-        }
-        `,
         variables: {
             language : 'en',
             site : site,
@@ -567,130 +113,6 @@ const queries = {
         },
     },
     AddSelectionToBetslipMutation : {
-        query: `
-        mutation AddSelectionToBetslipMutation($input: SportsbetNewGraphqlAddSelectionToBetslipInput!, $language: String!) {
-            __typename
-            sportsbetNewGraphqlAddSelectionToBetslip(input: $input) {
-                errors {
-                    __typename
-                    message
-                    code
-                    params {
-                        __typename
-                        name
-                        value
-                    }
-                }
-                betslip {
-                    ...BetslipFragment
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment BetslipFragment on SportsbetNewGraphqlBetslip {
-            __typename
-            id
-            userId
-            active
-            type
-            stake
-            currencyCode
-            insuranceActive
-            isEligibleForMultibetEnsurance
-            __typename
-            bets {
-                __typename
-                id
-                freeBetId
-                selections {
-                    __typename
-                    id
-                    marketId
-                    selectionId
-                    eventId
-                    betBoostTemplateId
-                    stake
-                    odds
-                    EW
-                    __typename
-                    event {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        maxBetAvailable
-                        information {
-                            __typename
-                            id
-                            customEventId
-                            allowCustomEventMultibets
-                        }
-                        providerId
-                        slug
-                        sport {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                            viewType
-                        }
-                        tournament {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        league {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        racingEventInfo {
-                            __typename
-                            id
-                            eventNumber
-                            trackName
-                        }
-                    }
-                    market {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        marketFeatures
-                        selections {
-                            __typename
-                            id
-                            name(language: $language)
-                            active
-                        }
-                        market_type {
-                            __typename
-                            id
-                            settings {
-                                __typename
-                                id
-                                betBoostMultiplier
-                            }
-                        }
-                    }
-                    selection {
-                        __typename
-                        id
-                        odds
-                        name(language: $language)
-                        active
-                        providerProductId
-                    }
-                }
-            }
-        }        
-        `,
         variables: {
             language : 'en',
             input : {
@@ -711,249 +133,16 @@ const queries = {
         },
     },
     UpdateSingleBetslipStakeMutation : {
-        query: `
-        mutation UpdateSingleBetslipStakeMutation($input: SportsbetNewGraphqlUpdateSingleBetslipStakeInput!, $language: String!) {
-            sportsbetNewGraphqlUpdateSingleBetslipStake(input: $input) {
-                errors {
-                    message
-                    code
-                    params {
-                        name
-                        value
-                        __typename
-                    }
-                    __typename
-                }
-                betslip {
-                    ...BetslipFragment
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment BetslipFragment on SportsbetNewGraphqlBetslip {
-            __typename
-            id
-            userId
-            active
-            type
-            stake
-            currencyCode
-            insuranceActive
-            isEligibleForMultibetEnsurance
-            __typename
-            bets {
-                __typename
-                id
-                freeBetId
-                selections {
-                    __typename
-                    id
-                    marketId
-                    selectionId
-                    eventId
-                    betBoostTemplateId
-                    stake
-                    odds
-                    EW
-                    __typename
-                    event {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        maxBetAvailable
-                        information {
-                            __typename
-                            id
-                            customEventId
-                            allowCustomEventMultibets
-                        }
-                        providerId
-                        slug
-                        sport {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                            viewType
-                        }
-                        tournament {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        league {
-                            __typename
-                            id
-                            slug
-                            betBoostMultiplier
-                        }
-                        racingEventInfo {
-                            __typename
-                            id
-                            eventNumber
-                            trackName
-                        }
-                    }
-                    market {
-                        __typename
-                        id
-                        name(language: $language)
-                        enName: name(language: "en")
-                        status
-                        marketFeatures
-                        selections {
-                            __typename
-                            id
-                            name(language: $language)
-                            active
-                        }
-                        market_type {
-                            __typename
-                            id
-                            settings {
-                                __typename
-                                id
-                                betBoostMultiplier
-                            }
-                        }
-                    }
-                    selection {
-                        __typename
-                        id
-                        odds
-                        name(language: $language)
-                        active
-                        providerProductId
-                    }
-                }
-            }
-        }
-       `,
         variables: {
             language : 'en',
             input: {
                 stake : '1000',
-                selectionId : '',
+                selectionId : selectionId,
                 id : SportsbetNewGraphqlBetslip
             }
         },
     },
     PlaceBetSingleBetsMutation : {
-        query: `
-        mutation PlaceBetSingleBetsMutation($input: SportsbetTicketsCreateSingleBetsInput!, $language: String!) {
-            sportsbetTicketsPlaceSingleBets(input: $input) {
-                errors {
-                    message
-                    code
-                    params {
-                        name
-                        value
-                        __typename
-                    }
-                    __typename
-                }
-                betErrors {
-                    message
-                    code
-                    params {
-                        name
-                        value
-                        __typename
-                    }
-                    __typename
-                }
-                tickets {
-                    ...TicketFragment
-                    __typename
-                }
-                __typename
-            }
-        }
-        
-        fragment TicketFragment on SportsbetTicketsTicket {
-            id
-            __typename
-            status
-            won_amount
-            placed_at
-            stake_amount
-            max_win
-            alternative_stake
-            odds
-            boosted_odds
-            boosted_ticket
-            bet_type
-            multiboost
-            insuranceActive
-            bets {
-                id
-                __typename
-                amount
-                total_odds
-                cashback_percent
-                selections {
-                    id
-                    __typename
-                    event_id
-                    status
-                    void_factor
-                    boosted_odds
-                    odds
-                    market_name(language: $language)
-                    enName: market_name(language: "en")
-                    event_start_time
-                    event_score
-                    event_type
-                    selection_id
-                    name(language: $language)
-                    event_name(language: $language)
-                    provider_product_id
-                    sport {
-                        id
-                        __typename
-                        iconCode
-                        scoreType
-                    }
-                    market {
-                        id
-                        selections {
-                            id
-                            name(language: $language)
-                            odds
-                            active
-                            __typename
-                        }
-                        __typename
-                    }
-                }
-                free_bet
-            }
-            cashout {
-                id
-                __typename
-                instances {
-                    __typename
-                    performedAt
-                    amount
-                    type
-                    paidAmount
-                    oddsAtCashout
-                }
-            }
-            currencyCode
-            racingMeta {
-                selectionId
-                track
-                raceNumber
-                __typename
-            }
-        }
-        `,
         variables: {
             language : 'en',
             input : {
@@ -965,8 +154,8 @@ const queries = {
                 locale : 'en',
                 betslipId : SportsbetNewGraphqlBetslip,
                 selections : {
-                    id : '',
-                    odds : '',
+                    id : selectionId,
+                    odds : odds,
                     betBoostTemplateId : null,
                     amount : 1000,
                     freeBetId : null,
@@ -1059,10 +248,13 @@ export default function () {
         'SportsbetPreferencesUserPreference Id received': () => SportsbetPreferencesUserPreference !== undefined,
     });
     successCounter.add(1);
-    queries.PreferencesQuery.variables.userPreferenceId = SportsbetPreferencesUserPreference;
+    requestVariables.PreferencesQuery.variables.userPreferenceId = SportsbetPreferencesUserPreference;
 
     // Step 2: Preferences Query -----------------------------------------------------------------------
-    let preferencesQuery = http.post(`${BASE_URL}`, JSON.stringify(queries.PreferencesQuery), {
+    let preferencesQuery = http.post(`${BASE_URL}`, JSON.stringify({
+        query: PreferencesQuery,
+        variables : requestVariables.PreferencesQuery.variables
+    }), {
         headers: { 'Content-Type': 'application/json' },
     });
     SportsbetPreferencesBetslip = preferencesQuery.json('data.sportsbetPreferences.getUserPreferencesById.betslipId');
@@ -1071,10 +263,13 @@ export default function () {
         'SportsbetPreferencesBetslip Id received': () => SportsbetPreferencesBetslip !== undefined,
     });
     successCounter.add(1);
-    queries.BetslipQuery.variables.betslipId = SportsbetPreferencesBetslip;
+    requestVariables.BetslipQuery.variables.betslipId = SportsbetPreferencesBetslip;
 
     // Step 3: LoginUser Query -----------------------------------------------------------------------
-    let loginUserQuery = http.post(`${BASE_URL}`, JSON.stringify(queries.LoginUser), {
+    let loginUserQuery = http.post(`${BASE_URL}`, JSON.stringify({
+        query: LoginUserMutation,
+        variables: requestVariables.LoginUser.variables
+    }), {
         headers: { 'Content-Type': 'application/json' },
     });
     authToken = 'Bearer ' + loginUserQuery.json('data.userManagementLoginViaPassword.token');
@@ -1088,22 +283,28 @@ export default function () {
         'Content-Type': 'application/json',
         Authorization: authToken,
     };
-    queries.TakeOwnershipOfBetSlip.variables.token = authToken;
-    queries.TakeOwnershipOfBetSlip.variables.userPreferenceId = SportsbetPreferencesUserPreference;
-    queries.TakeOwnershipOfBetSlip.variables.betslipId = SportsbetPreferencesBetslip;
+    requestVariables.TakeOwnershipOfBetSlip.variables.token = authToken;
+    requestVariables.TakeOwnershipOfBetSlip.variables.userPreferenceId = SportsbetPreferencesUserPreference;
+    requestVariables.TakeOwnershipOfBetSlip.variables.betslipId = SportsbetPreferencesBetslip;
 
     // Step 4: TakeOwnershipOfBetSlip Query -----------------------------------------------------------------------
-    let takeOwnershipOfBetslip = http.post(`${BASE_URL}`, JSON.stringify(queries.TakeOwnershipOfBetSlip), {
+    let takeOwnershipOfBetslip = http.post(`${BASE_URL}`, JSON.stringify({
+        query: TakeOwnershipOfBetSlipMutation,
+        variables: requestVariables.TakeOwnershipOfBetSlip.variables
+    }), {
         headers: headers,
     });
     check(takeOwnershipOfBetslip, {
         'TakeOwnershipOfBetSlip query responded with status 200': (r) => r.status === 200,
     });
     successCounter.add(1);
-    queries.BetslipQuery.variables.betslipId = SportsbetPreferencesBetslip;
+    requestVariables.BetslipQuery.variables.betslipId = SportsbetPreferencesBetslip;
 
     // Step 5: Betslip Query -----------------------------------------------------------------------
-    let betslipQuery = http.post(`${BASE_URL}`, JSON.stringify(queries.BetslipQuery), {
+    let betslipQuery = http.post(`${BASE_URL}`, JSON.stringify({
+        query: BetslipQuery,
+        variables: requestVariables.BetslipQuery.variables
+    }), {
         headers: headers,
     });
     SportsbetNewGraphqlBetslip = betslipQuery.json('data.sportsbetNewGraphql.getBetslipById.id');
@@ -1114,7 +315,10 @@ export default function () {
     successCounter.add(1);
 
     // Step 5: UpcomingRegionCategories Query -----------------------------------------------------------------------
-    let upcomingRegionCategoriesQuery = http.post(`${BASE_URL}`, JSON.stringify(queries.UpcomingRegionCategoriesQuery), {
+    let upcomingRegionCategoriesQuery = http.post(`${BASE_URL}`, JSON.stringify({
+        query: UpcomingRegionCategoriesQuery,
+        variables: requestVariables.UpcomingRegionCategoriesQuery.variables
+    }), {
         headers: headers,
     });
     tournamentId = upcomingRegionCategoriesQuery.json('data.sportsbetNewGraphql.region.sports.0.leagues.0.tournaments.0.id');
@@ -1123,10 +327,13 @@ export default function () {
         'Upcoming Tournament 01 Id received': () => tournamentId !== undefined,
     });
     successCounter.add(1);
-    queries.DesktopAsianEventListPreviewQuery.variables.tournamentId = tournamentId;
+    requestVariables.DesktopAsianEventListPreviewQuery.variables.tournamentId = tournamentId;
 
     // Step 6: DesktopAsianEventListPreview Query -----------------------------------------------------------------------
-   let desktopAsianEventListPreviewQuery = http.post(`${BASE_URL}`, JSON.stringify(queries.DesktopAsianEventListPreviewQuery), {
+   let desktopAsianEventListPreviewQuery = http.post(`${BASE_URL}`, JSON.stringify({
+       query: DesktopAsianEventListPreviewQuery,
+       variables: requestVariables.DesktopAsianEventListPreviewQuery.variables
+   }), {
         headers: headers,
     });
     eventId = desktopAsianEventListPreviewQuery.json('data.sportsbetNewGraphql.getTournamentById.events.0.id');
@@ -1147,17 +354,20 @@ export default function () {
     SportsbetNewGraphqlBetslipBet = toGraphqlId(betslipBetId, 'SportsbetNewGraphqlBetslipBet');
     SportsbetNewGraphqlBetslipBetSelection = toGraphqlId(betslipBetSelectionId, 'SportsbetNewGraphqlBetslipBetSelection');
 
-    queries.AddSelectionToBetslipMutation.variables.input.preferenceId = SportsbetPreferencesUserPreference;
-    queries.AddSelectionToBetslipMutation.variables.input.id = SportsbetNewGraphqlBetslip;
-    queries.AddSelectionToBetslipMutation.variables.input.betId = SportsbetNewGraphqlBetslipBet;
-    queries.AddSelectionToBetslipMutation.variables.input.selection.id = SportsbetNewGraphqlBetslipBetSelection;
-    queries.AddSelectionToBetslipMutation.variables.input.selection.odds = odds;
-    queries.AddSelectionToBetslipMutation.variables.input.selection.eventId = eventId;
-    queries.AddSelectionToBetslipMutation.variables.input.selection.marketId = marketId;
-    queries.AddSelectionToBetslipMutation.variables.input.selection.selectionId = selectionId;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.preferenceId = SportsbetPreferencesUserPreference;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.id = SportsbetNewGraphqlBetslip;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.betId = SportsbetNewGraphqlBetslipBet;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.selection.id = SportsbetNewGraphqlBetslipBetSelection;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.selection.odds = odds;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.selection.eventId = eventId;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.selection.marketId = marketId;
+    requestVariables.AddSelectionToBetslipMutation.variables.input.selection.selectionId = selectionId;
 
     // Step 7: AddSelectionToBetslipMutation Query -----------------------------------------------------------------------
-   let addSelectionToBetslipMutation = http.post(`${BASE_URL}`, JSON.stringify(queries.AddSelectionToBetslipMutation), {
+   let addSelectionToBetslipMutation = http.post(`${BASE_URL}`, JSON.stringify({
+       query: AddSelectionToBetslipMutation,
+       variables: requestVariables.AddSelectionToBetslipMutation.variables
+   }), {
         headers: headers,
     });
     betslipId = addSelectionToBetslipMutation.json('data.sportsbetNewGraphqlAddSelectionToBetslip.betslip.id')
@@ -1166,11 +376,14 @@ export default function () {
         'Selection added Betslip Id received': () => betslipId !== undefined,
     });
     successCounter.add(1);
-    queries.UpdateSingleBetslipStakeMutation.variables.input.selectionId = selectionId;
-    queries.UpdateSingleBetslipStakeMutation.variables.input.id = SportsbetNewGraphqlBetslip;
+    requestVariables.UpdateSingleBetslipStakeMutation.variables.input.selectionId = selectionId;
+    requestVariables.UpdateSingleBetslipStakeMutation.variables.input.id = SportsbetNewGraphqlBetslip;
 
     // Step 8: UpdateSingleBetslipStakeMutation Query -----------------------------------------------------------------------
-   let updateSingleBetslipStakeMutation = http.post(`${BASE_URL}`, JSON.stringify(queries.UpdateSingleBetslipStakeMutation), {
+   let updateSingleBetslipStakeMutation = http.post(`${BASE_URL}`, JSON.stringify({
+       query: UpdateSingleBetslipStakeMutation,
+       variables: requestVariables.UpdateSingleBetslipStakeMutation.variables
+   }), {
         headers: headers,
     });
     betslipId = updateSingleBetslipStakeMutation.json('data.sportsbetNewGraphqlUpdateSingleBetslipStake.betslip.id')
@@ -1180,13 +393,16 @@ export default function () {
         'Updated Single Betslip Id received': () => betslipId !== undefined,
     });
     successCounter.add(1);
-    queries.PlaceBetSingleBetsMutation.variables.input.betslipId = SportsbetNewGraphqlBetslip;
-    queries.PlaceBetSingleBetsMutation.variables.input.selections.id = selectionId;
-    queries.PlaceBetSingleBetsMutation.variables.input.selections.odds = odds;
+    requestVariables.PlaceBetSingleBetsMutation.variables.input.betslipId = SportsbetNewGraphqlBetslip;
+    requestVariables.PlaceBetSingleBetsMutation.variables.input.selections.id = selectionId;
+    requestVariables.PlaceBetSingleBetsMutation.variables.input.selections.odds = odds;
 
 
     // Step 9: PlaceBetSingleBetsMutation Query -----------------------------------------------------------------------
-    let placeBetSingleBetsMutation = http.post(`${BASE_URL}`, JSON.stringify(queries.PlaceBetSingleBetsMutation), {
+    let placeBetSingleBetsMutation = http.post(`${BASE_URL}`, JSON.stringify({
+        query: PlaceBetSingleBetsMutation,
+        variables: requestVariables.PlaceBetSingleBetsMutation.variables
+    }), {
         headers: headers,
     });
     betslipId = placeBetSingleBetsMutation.json('data.sportsbetTicketsPlaceSingleBets.tickets.0.id')
