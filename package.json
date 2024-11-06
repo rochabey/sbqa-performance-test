@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run:perf": "dotenv -e .env -- k6 run scripts/demo.js"
   },
   "keywords": [],
   "author": "",
