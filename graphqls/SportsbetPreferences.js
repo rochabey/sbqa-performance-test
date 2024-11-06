@@ -1,4 +1,4 @@
-export const sportsbetPreferencesQuery =
+export const SportsbetPreferencesQuery =
     `{
           sportsbetPreferences {
               getUserPreferencesById(id: "", site: "sportsbet") {

@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Counter } from 'k6/metrics';
-import {sportsbetPreferencesQuery} from '../graphqls/SportsbetPreferences.js';
+import {SportsbetPreferencesQuery} from '../graphqls/SportsbetPreferences.js';
 import {PreferencesQuery} from "../graphqls/PreferencesQuery.js";
 import {LoginUserMutation} from "../graphqls/LoginUser.js";
 import {TakeOwnershipOfBetSlipMutation} from "../graphqls/TakeOwnershipOfBetSlip.js";
@@ -171,7 +171,7 @@ export default function() {
 
     // Step 1: Sportsbet Preferences  -----------------------------------------------------------------------
     let sportsbetPreferences = http.post(`${BASE_URL}`, JSON.stringify({
-        query: sportsbetPreferencesQuery,
+        query: SportsbetPreferencesQuery,
         variables: {}
     }), {
         headers: {
