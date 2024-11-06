@@ -4,7 +4,7 @@
 
 ### Prerequisites
 <h4>1. Install Node.js</h4>
-Ensure you have Node.js installed, as it may be used for additional dependencies or scripts. Download it from [Node.js](https://nodejs.org/en) download page.
+Ensure you have Node.js installed, as it may be used for additional dependencies or scripts. Download it here: [Node.js Download](https://nodejs.org/en)
 
 <h4>2. Install k6</h4>
 You can install k6 using Homebrew (macOS), Chocolatey (Windows), or download it directly.
@@ -29,7 +29,7 @@ npm install -g dotenv-cli
 Setup `sbqa-performance-test` test-suites by cloning from github repository
 
 ```bash
-$ git clone git@github.com:rochabey/sbqa-performance-test.git
+git clone git@github.com:rochabey/sbqa-performance-test.git
 ```
 
 Install project dependent packages
@@ -49,7 +49,7 @@ You can configure options like duration and virtual users in each k6 test script
 
 To run the performance script
 ```bash
-$ npm run run:perf
+npm run run:perf
 ```
 
 ## Related Links
